@@ -2,13 +2,12 @@ ESX = exports["es_extended"]:getSharedObject()
 
 local animacionEnCurso = false
 
--- Agregar modelos y eventos de ox_target
 exports.ox_target:addModel('prop_bong_01', {
     {
         name = 'bong',
         event = 'bong:fumar',
         icon = 'fa-solid fa-cannabis',
-        label = 'Fumar bong.',
+        label = Config.Messages.smokeBong,
     }
 })
 
@@ -17,11 +16,10 @@ exports.ox_target:addModel('prop_bong_01', {
         name = 'bong2',
         event = 'bong:recoger',
         icon = 'fa-regular fa-hand',
-        label = 'Quitar bong más cercano.',
+        label = Config.Messages.removeBong,
     }
 })
 
--- Evento de spawnear bong
 RegisterNetEvent("bong:spawnear")
 AddEventHandler("bong:spawnear", function()
     print("Evento bong:spawnear recibido")
@@ -42,7 +40,7 @@ AddEventHandler("bong:spawnear", function()
     Wait(1000)
     TriggerServerEvent("colocarbong")
     local prop = CreateObject(modelHash, coords.x, coords.y, coordZ, true, true)
-    ESX.ShowNotification("You have placed a bong")
+    ESX.ShowNotification(Config.Messages.bongPlaced)
     SetEntityCollision(prop, true, true)
     FreezeEntityPosition(prop, true)
 end)
@@ -52,7 +50,6 @@ RegisterCommand("cleareffect", function(source, args, rawCommand)
     ClearPedTasks(PlayerPedId())
 end)
 
--- Evento para recoger el bong
 RegisterNetEvent("bong:recoger")
 AddEventHandler("bong:recoger", function()
     if not animacionEnCurso then
@@ -65,16 +62,15 @@ AddEventHandler("bong:recoger", function()
             TriggerServerEvent("givearbong")
             TriggerEvent('animacion2')
             Wait(1000)
-            ESX.ShowNotification("You have picked up the bong.")
+            ESX.ShowNotification(Config.Messages.bongPickedUp)
         else
-            ESX.ShowNotification("There is no bong nearby")
+            ESX.ShowNotification(Config.Messages.noBongNearby)
         end
     else
-        ESX.ShowNotification("You cannot pick up the bong while smoking.")
+        ESX.ShowNotification(Config.Messages.cannotPickUpWhileSmoking)
     end
 end)
 
--- Evento para fumar el bong
 RegisterNetEvent("bong:fumar")
 AddEventHandler("bong:fumar", function()
     local ped = PlayerPedId()
@@ -85,15 +81,14 @@ AddEventHandler("bong:fumar", function()
             TriggerEvent('animacion')
             Wait(8000)
             TriggerServerEvent("eff_smokes", pedNetId)
-            Wait(3500)
+            Wait(4500)
             animacionEnCurso = false
         else
-            ESX.ShowNotification("You are already smoking a bong.")
+            ESX.ShowNotification(Config.Messages.alreadySmoking)
         end
     end
 end)
 
--- Animación de fumar
 RegisterNetEvent('animacion')
 AddEventHandler('animacion', function()
     local player = PlayerPedId()
@@ -104,7 +99,7 @@ AddEventHandler('animacion', function()
         Wait(500)
     end
 
-    ESX.ShowNotification("You have started smoking a bong")
+    ESX.ShowNotification(Config.Messages.startedSmoking)
 
     local boneIndex = GetPedBoneIndex(player, 18905)
     local x, y, z = 0.1, -0.26, 0.015
@@ -122,7 +117,7 @@ AddEventHandler('animacion', function()
     Wait(3200)
 
     ClearPedTasks(player)
-    ESX.ShowNotification("You have stopped smoking a bong")
+    ESX.ShowNotification(Config.Messages.stoppedSmoking)
     FreezeEntityPosition(player, false)
     RemoveAnimDict("anim@safehouse@bong")
     SetTimecycleModifier("spectator5")
@@ -131,7 +126,6 @@ AddEventHandler('animacion', function()
     ClearPedTasks(player)
 end)
 
--- Efecto de humo
 p_smoke_location = {
     20279,
 }
@@ -174,7 +168,6 @@ AddEventHandler("c_eff_smokes", function(c_ped)
     end
 end)
 
--- Animación de recoger
 RegisterNetEvent('animacion2')
 AddEventHandler('animacion2', function()
     local player = PlayerPedId()
