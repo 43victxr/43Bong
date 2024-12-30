@@ -1,5 +1,5 @@
 # Fivem Premium Bong Script :boom:
-# [DOWNLOAD NOW!](https://github.com/43victxr/43Bong/releases/download/43Bong/43Bong.zip)
+- [**DOWNLOAD NOW!**](https://github.com/43victxr/43Bong/releases/download/43Bong/43Bong.zip)
 
 * Enhance your FiveM server with this Fully Interactive Weed Bong, featuring a realistic smoke system Synced with vSync and and highly interactive thanks to the ox_target & ox_lib script.
 * Fully configurable
