@@ -5,32 +5,37 @@ AddEventHandler("eff_smokes", function(entity)
     TriggerClientEvent("c_eff_smokes", -1, entity)
 end)
 
--- Evento para dar el bong al jugador
+-- RECOGER BONG
 RegisterServerEvent("givearbong")
 AddEventHandler("givearbong", function()
     local xPlayer = ESX.GetPlayerFromId(source)
     xPlayer.addInventoryItem('bong', 1)
 end)
 
--- Registro del uso del item bong
-ESX.RegisterUsableItem('bong', function(playerId)
-    local xPlayer = ESX.GetPlayerFromId(playerId)
+ESX.RegisterUsableItem('bong', function(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
+    
     xPlayer.removeInventoryItem('bong', 1)
-    TriggerClientEvent('bong:spawnear', playerId)
-    print("Ejecutado")
+    
+    TriggerClientEvent('bong:spawnear', source)
 end)
 
--- Corrección del comando spawn para pasar el playerId como argumento
-RegisterCommand("spawn", function(source)
-    if source == 0 then
-        print("El comando no se puede ejecutar desde la consola del servidor.")
-        return
-    end
-
+RegisterServerEvent("givearbong2")
+AddEventHandler("givearbong2", function(amount)
+    
     local xPlayer = ESX.GetPlayerFromId(source)
-    if xPlayer then
-        TriggerClientEvent("bong:fumar", source)
+    
+    moneyf = amount * Config.bongPrice
+    
+    pmoney = xPlayer.hasItem(Config.moneyItem)
+    
+    if pmoney.count >= moneyf then
+        xPlayer.removeInventoryItem(Config.moneyItem, moneyf)
+        xPlayer.addInventoryItem('bong', amount)
+        TriggerClientEvent('esx:showNotification', source, 'You have succesfully bought '.. amount .. ' bong for ' .. moneyf .. '$', 'success')
     else
-        print("El comando no se pudo ejecutar. El jugador no fue encontrado.")
+        TriggerClientEvent('esx:showNotification', source, 'You dont have enought money!', 'error')
+        
     end
-end, false)
+    
+end)

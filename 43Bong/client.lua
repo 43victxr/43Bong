@@ -1,27 +1,27 @@
 ESX = exports["es_extended"]:getSharedObject()
 
 local animacionEnCurso = false
+local npcPed = nil
 
 exports.ox_target:addModel('prop_bong_01', {
     {
         name = 'bong',
         event = 'bong:fumar',
         icon = 'fa-solid fa-cannabis',
-        label = Config.Messages.smokeBong,
+        label = Config.Messages.smokeBongLabel,
     }
 })
-
 exports.ox_target:addModel('prop_bong_01', {
     {
         name = 'bong2',
         event = 'bong:recoger',
         icon = 'fa-regular fa-hand',
-        label = Config.Messages.removeBong,
+        label = Config.Messages.removeNearestBong,
     }
 })
 
 RegisterNetEvent("bong:spawnear")
-AddEventHandler("bong:spawnear", function()
+AddEventHandler("bong:spawnear", function(source)
     print("Evento bong:spawnear recibido")
     local playerPed = PlayerPedId()
     local coords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 0.8, 0.0)
@@ -29,7 +29,7 @@ AddEventHandler("bong:spawnear", function()
 
     local hit, coordZ = GetGroundZFor_3dCoord(coords.x, coords.y, z + 1.0)
 
-    local modelHash = GetHashKey("prop_bong_01")
+    local modelHash = GetHashKey(Config.devPropBong)
     RequestModel(modelHash)
 
     while not HasModelLoaded(modelHash) do
@@ -37,7 +37,7 @@ AddEventHandler("bong:spawnear", function()
     end
     
     TriggerEvent('animacion2')
-    Wait(1000)
+    Wait(500)
     TriggerServerEvent("colocarbong")
     local prop = CreateObject(modelHash, coords.x, coords.y, coordZ, true, true)
     ESX.ShowNotification(Config.Messages.bongPlaced)
@@ -50,18 +50,19 @@ RegisterCommand("cleareffect", function(source, args, rawCommand)
     ClearPedTasks(PlayerPedId())
 end)
 
+-- RECOGER
 RegisterNetEvent("bong:recoger")
 AddEventHandler("bong:recoger", function()
     if not animacionEnCurso then
         local playerPed = PlayerId()
         local playerPos = GetEntityCoords(GetPlayerPed(-1))
-        local bongObject = GetClosestObjectOfType(playerPos.x, playerPos.y, playerPos.z, 10.0, GetHashKey("prop_bong_01"), false, false, false)
+        local bongObject = GetClosestObjectOfType(playerPos.x, playerPos.y, playerPos.z, 10.0, GetHashKey(Config.devPropBong), false, false, false)
 
         if DoesEntityExist(bongObject) then
             DeleteEntity(bongObject)
             TriggerServerEvent("givearbong")
             TriggerEvent('animacion2')
-            Wait(1000)
+            Wait(100)
             ESX.ShowNotification(Config.Messages.bongPickedUp)
         else
             ESX.ShowNotification(Config.Messages.noBongNearby)
@@ -71,6 +72,7 @@ AddEventHandler("bong:recoger", function()
     end
 end)
 
+-- HUMO
 RegisterNetEvent("bong:fumar")
 AddEventHandler("bong:fumar", function()
     local ped = PlayerPedId()
@@ -81,7 +83,7 @@ AddEventHandler("bong:fumar", function()
             TriggerEvent('animacion')
             Wait(8000)
             TriggerServerEvent("eff_smokes", pedNetId)
-            Wait(4500)
+            Wait(3500)
             animacionEnCurso = false
         else
             ESX.ShowNotification(Config.Messages.alreadySmoking)
@@ -92,7 +94,7 @@ end)
 RegisterNetEvent('animacion')
 AddEventHandler('animacion', function()
     local player = PlayerPedId()
-    local modelHash = GetHashKey("prop_bong_01")
+    local modelHash = GetHashKey(Config.devPropBong)
     RequestAnimDict("anim@safehouse@bong")
 
     while not HasAnimDictLoaded("anim@safehouse@bong") do
@@ -140,7 +142,7 @@ AddEventHandler("c_eff_smokes", function(c_ped)
             local createdPart = StartParticleFxLoopedOnEntityBone(p_smoke_particle, NetToPed(c_ped), 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, GetPedBoneIndex(NetToPed(c_ped), bones), 1.0, 0.0, 0.0, 0.0, true, true, true, 2.0)
 
             Wait(3000)
-
+            
             while DoesParticleFxLoopedExist(createdSmoke) do
                 StopParticleFxLooped(createdSmoke, 1)
                 Wait(0)
@@ -178,4 +180,87 @@ AddEventHandler('animacion2', function()
     end
 
     TaskPlayAnim(player, "random@domestic", "pickup_low", 8.0, -8.0, -1, 0, 0, false, false, false)
+end)
+
+--NPC PART
+
+local npcModel = "s_m_y_dealer_01"
+local animDict = "amb@world_human_drug_dealer_hard@male@idle_b"
+local animName = "idle_d"
+
+function loadModel(model)
+    RequestModel(model)
+    while not HasModelLoaded(model) do
+        Wait(500)
+    end
+end
+
+function loadAnimDict(dict)
+    RequestAnimDict(dict)
+    while not HasAnimDictLoaded(dict) do
+        Wait(500)
+    end
+end
+
+function spawnNPC()
+    local playerPed = PlayerPedId()
+    local playerCoords = GetEntityCoords(playerPed)
+    local spawnCoords = GetOffsetFromEntityInWorldCoords(playerPed, 0.0, 2.0, 0.0)
+    local heading = GetEntityHeading(playerPed)
+
+    loadModel(npcModel)
+
+    local npcPed = CreatePed(4, GetHashKey(npcModel), Config.x, Config.y, Config.z-1, Config.h, true, false)
+
+    SetBlockingOfNonTemporaryEvents(npcPed, true)
+    SetEntityInvincible(npcPed, true)
+    FreezeEntityPosition(npcPed, true)
+    loadAnimDict(animDict)
+    TaskPlayAnim(npcPed, animDict, animName, 8.0, -8.0, -1, 1, 0, false, false, false)
+
+    if Config.blipActive == true then
+        Wait(100)
+	    bongBlip = AddBlipForEntity(npcPed)
+        SetBlipSprite(bongBlip, 51)
+        SetBlipDisplay(bongBlip, 2)
+        SetBlipColour(bongBlip, 50)
+        SetBlipScale(bongBlip, 0.8)
+        BeginTextCommandSetBlipName("STRING")
+        AddTextComponentString(Config.Messages.dealerBlipName)
+        EndTextCommandSetBlipName(bongBlip)
+    end
+
+    exports.ox_target:addLocalEntity(npcPed, {
+        {
+            name = 'npcDealer',
+            event = 'dealer:buylib',
+            icon = 'fa-regular fa-comments',
+            label = Config.Messages.talkingToDealer,
+        }
+    })
+end
+
+if Config.isActive == true then
+spawnNPC()
+end
+
+
+-- Speak NPC
+RegisterNetEvent("dealer:buylib")
+AddEventHandler("dealer:buylib", function()
+local input = lib.inputDialog(Config.Messages.bongDealerName, {
+    {type = 'number', label = Config.Messages.amount, description = Config.Messages.enterBongAmount .. Config.bongPrice .. "$", icon = 'hashtag'}
+})
+
+res = json.encode(input)
+local decodedInput = json.decode(res)
+local amount = decodedInput[1]
+
+    if amount >= 1 then
+        TriggerServerEvent("givearbong2", amount)
+
+    else
+        ESX.ShowNotification(Config.Messages.minBongAmount)
+    end
+
 end)
