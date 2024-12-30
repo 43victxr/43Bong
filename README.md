@@ -13,8 +13,9 @@
 - ox_lib
 - ESX  Framework
 
+## [**📹 | CLICK HERE TO WATCH THE PREVIEW**](https://youtu.be/Gp8eKRmlAjg)
 ## [**📂 | DOWNLOAD NOW!**](https://github.com/43victxr/43Bong/releases/download/43Bong/43Bong.zip)
-## [⚡ | Join our Discord to get support and stay updated on new script releases](https://discord.gg/2T4mNuRkfu) 
+## [**⚡ | Join our Discord to get support and stay updated on new script releases**](https://discord.gg/2T4mNuRkfu) 
 ‎
 > [!WARNING]
 All Rights Reserved - 43victxr's Store - NOT REDISTRIBUTABLE WITHOUT PERMISSION
