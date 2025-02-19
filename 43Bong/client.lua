@@ -210,7 +210,7 @@ function spawnNPC()
 
     loadModel(npcModel)
 
-    local npcPed = CreatePed(4, GetHashKey(npcModel), Config.x, Config.y, Config.z-1, Config.h, true, false)
+    local npcPed = CreatePed(4, GetHashKey(npcModel), Config.x, Config.y, Config.z-1, Config.h, false, false)
 
     SetBlockingOfNonTemporaryEvents(npcPed, true)
     SetEntityInvincible(npcPed, true)
